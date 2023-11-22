@@ -14,7 +14,7 @@ import {
 import goTo from 'vuetify/lib/services/goto';
 import type { VuetifyGoToTarget } from 'vuetify/types/services/goto';
 
-import MoviesView from '@/views/MoviesView.vue';
+import MoviesView from './views/MoviesView.vue';
 
 /** Router Config */
 const routes: RouteRecordRaw[] = [

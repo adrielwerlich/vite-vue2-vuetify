@@ -5,6 +5,7 @@ import type {
   GetterTree,
   MutationTree,
   StoreOptions,
+// @ts-ignore
 } from 'vuex';
 
 import type { Movie, MovieDetail } from '@/interfaces/MovieInterface';
