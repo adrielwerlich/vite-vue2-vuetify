@@ -48,7 +48,7 @@
   </v-card>
 </template>
 <script lang="ts">
-import { onMounted, defineComponent, computed, type WritableComputedRef, type PropType } from 'vue';
+import { defineComponent, computed, type WritableComputedRef } from 'vue';
 import { useStore } from '@logue/vue2-helpers/vuex';
 import { type MovieDetail } from '@/interfaces/MovieInterface';
 

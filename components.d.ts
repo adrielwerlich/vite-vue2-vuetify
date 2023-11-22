@@ -31,6 +31,7 @@ declare module 'vue' {
     VCardTitle: typeof import('vuetify/lib')['VCardTitle']
     VCol: typeof import('vuetify/lib')['VCol']
     VContainer: typeof import('vuetify/lib')['VContainer']
+    VCounter: typeof import('vuetify/lib')['VCounter']
     VDivider: typeof import('vuetify/lib')['VDivider']
     VExpandTransition: typeof import('vuetify/lib')['VExpandTransition']
     VFadeTransition: typeof import('vuetify/lib')['VFadeTransition']

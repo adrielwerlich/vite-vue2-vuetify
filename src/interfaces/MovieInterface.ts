@@ -24,6 +24,7 @@ export interface MovieDetail {
   Production: string;
   Website: string;
   Response: string;
+  Score: number;
 }
 
 interface Rating {
