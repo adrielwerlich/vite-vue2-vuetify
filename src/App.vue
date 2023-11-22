@@ -2,17 +2,16 @@
   <v-app>
     <v-app-bar app>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-app-bar-title>{{ title }}</v-app-bar-title>
+      <v-app-bar-title class="show-on-big-screen">{{ title }}</v-app-bar-title>
       <v-spacer />
+      <div class="search-input-container">
+        <v-autocomplete v-model="selectedItem" density="compact" class="search-input" :items="moviesData"
+          :search-input.sync="search" hide-selected item-text="name" item-value="name" return-object
+          label="Search your movie" placeholder="Start typing to Search" clearable></v-autocomplete>
+      </div>
       <app-bar-menu-component />
-      <v-progress-linear
-        :active="loading"
-        :indeterminate="progress === null"
-        :value="progress"
-        absolute
-        bottom
-        color="primary accent-3"
-      />
+      <v-progress-linear :active="loading" :indeterminate="progress === null" :value="progress" absolute bottom
+        color="primary accent-3" />
     </v-app-bar>
 
     <v-navigation-drawer v-model="drawer" app>
@@ -29,12 +28,7 @@
       <v-progress-circular indeterminate size="64" />
     </v-overlay>
 
-    <v-snackbar
-      v-model="snackbar"
-      app
-      timeout="5000"
-      transition="scroll-y-transition"
-    >
+    <v-snackbar v-model="snackbar" app timeout="5000" transition="scroll-y-transition">
       {{ snackbarText }}
       <template #action="{ attrs }">
         <v-btn color="primary" icon v-bind="attrs" @click="snackbar = false">
@@ -44,10 +38,7 @@
     </v-snackbar>
 
     <teleport to="head">
-      <meta
-        name="theme-color"
-        :content="theme.currentTheme.primary?.toString()"
-      />
+      <meta name="theme-color" :content="theme.currentTheme.primary?.toString()" />
       <link rel="icon" :href="logo" type="image/svg+xml" />
     </teleport>
   </v-app>
@@ -74,6 +65,7 @@ import { useRoute, useRouter } from 'vue-router/composables';
 import logo from '@/assets/vuetify.svg';
 import AppBarMenuComponent from '@/components/AppBarMenuComponent.vue';
 import DrawerComponent from '@/components/DrawerComponent.vue';
+import type { Movie } from './interfaces/MovieInterface';
 
 /** App */
 export default defineComponent({
@@ -97,14 +89,31 @@ export default defineComponent({
     /** Vuetify Theme */
     const theme = useTheme();
 
+    /** SelectedItem */
+    // const selectedItem: Ref<Movie | null> = ref(null);
+    const selectedItem: WritableComputedRef<string> = computed({
+      get: () => store.getters.selectedItem,
+      set: v => {
+        if (!v || v?.length === 0) return;
+        loading.value = true;
+        const regex = /imdbID: (\w+)/;
+        const match = v.match(regex);
+        const imdbID = match ? match[1] : null;
+        store.dispatch('fetchMovieDetail', imdbID);
+        store.dispatch('setSelectedItem', v);
+        if (route.name !== 'Home') router.push({ name: 'Home' });
+      },
+    });
+
     /** Title */
     const title: Ref<string> = ref(
-      import.meta.env.VITE_APP_TITLE || 'Vite Vuetify Application'
+      import.meta.env.VITE_APP_TITLE || 'List and favorite your movies'
     );
     /** Drawer menu visibility */
     const drawer: Ref<boolean> = ref(false);
     /** Snackbar visibility */
     const snackbar: Ref<boolean> = ref(false);
+
 
     /** Snackbar text */
     const snackbarText: WritableComputedRef<string> = computed({
@@ -166,7 +175,22 @@ export default defineComponent({
       await nextTick();
     };
 
+    /** Search */
+    const search: WritableComputedRef<string> = computed({
+      get: () => store.getters.search,
+      set: v => store.dispatch('setSearch', v),
+    });
+
+    /** Movies list */
+    const moviesData: WritableComputedRef<string[]> = computed({
+      get: () => store.getters.movies.map((movie: Movie) => `Title: ${movie.Title}, Year: ${movie.Year}, Type: ${movie.Type}, imdbID: ${movie.imdbID}`),
+      set: (v: string[]) => store.dispatch('setMovies', v),
+    });
+
     return {
+      moviesData,
+      selectedItem,
+      search,
       logo,
       theme,
       title,
@@ -208,6 +232,35 @@ html {
   background-color: map-get($grey, 'base');
   box-shadow: inset 0 0 0.5rem rgba(0, 0, 0, 0.1);
 }
+
+.search-input {
+  width: 100%;
+  max-width: 600px;
+  top: 25%;
+}
+
+.search-input-container {
+  width: 83%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-self: stretch;
+}
+
+@media (max-width: 1500px) {
+  .show-on-big-screen {
+    display: none;
+  }
+}
+
+@media (min-width: 1500px) {
+  .search-input {
+    position: absolute;
+    right: 35%;
+  }
+}
+
+
 
 /*
 // Color scheme of scroll bar according to the theme

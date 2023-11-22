@@ -1,6 +1,5 @@
 <template>
   <v-container class="home">
-    <hello-world msg="Welcome to Your Vue.js + TypeScript App" />
     <teleport to="head">
       <meta
         name="keyword"
@@ -11,6 +10,7 @@
         {{ jsonLd }}
       </component>
     </teleport>
+    <movie-detail msg="Here you can see the details of your favorite movie" />
   </v-container>
 </template>
 
@@ -20,15 +20,9 @@ import { defineComponent, watch, type SetupContext } from 'vue';
 // import { useStore } from '@logue/vue2-helpers/vuex';
 import { useRoute } from 'vue-router/composables';
 
-import logo from '@/assets/vuetify.svg';
-import HelloWorld from '@/components/HelloWorld.vue';
 
 /** Home Component */
 export default defineComponent({
-  /** Components */
-  components: {
-    HelloWorld,
-  },
   /**
    * Setup
    *
@@ -50,20 +44,10 @@ export default defineComponent({
         name: 'Vite Vue2 TypeScript Startar',
         url: 'https://github.com/logue/vite-vue2-vuetify-ts-starter',
         description: 'Vite Vue2 TypeScript Demo Page',
-        logo,
       },
       null,
       2
     );
-
-    /* *
-     * Computed
-     * /
-    const computedValue: Ref<string> = computed({
-      get: () => store.getters.computedValue,
-      set: v => store.dispatch('setComputedValue', v)
-    }
-     */
 
     // Watch
     watch(

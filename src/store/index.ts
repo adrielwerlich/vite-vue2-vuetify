@@ -7,10 +7,13 @@ import type {
   StoreOptions,
 } from 'vuex';
 
+import type { Movie, MovieDetail } from '@/interfaces/MovieInterface';
+
 import { createStore } from '@logue/vue2-helpers/vuex';
 import { VuexPersistence } from 'vuex-persist';
 
 import ConfigModule from './ConfigModule';
+import type { WritableComputedRef } from 'vue';
 
 /** Root State Interface */
 export interface RootState {
@@ -22,6 +25,16 @@ export interface RootState {
   message: string;
   /** Error Message */
   error: string;
+  /** Search */
+  search: string;
+  /** Movies listing */
+  movies: Movie[];
+  /** Selected Item */
+  selectedItem: Movie | null;
+  /** Movie detail */
+  movieDetail: MovieDetail | null;
+  /** Favorite Movies */
+  favorites: MovieDetail[];
 }
 
 /** State Default value */
@@ -30,14 +43,23 @@ const state: RootState = {
   progress: 0,
   message: '',
   error: '',
+  search: '',
+  movies: [],
+  selectedItem: null,
+  movieDetail: null,
+  favorites: [],
 };
 
 /** Getters */
 const getters: GetterTree<RootState, RootState> = {
-  loading: (s): boolean => s.loading,
-  progress: (s): number | null => s.progress,
-  message: (s): string => s.message,
-  error: (s): string => s.error,
+  loading: (state: RootState): boolean => state.loading,
+  progress: (state: RootState): number | null => state.progress,
+  message: (state: RootState): string => state.message,
+  error: (state: RootState): string => state.error,
+  movies: (state: RootState): Movie[] => state.movies,
+  selectedItem: (state: RootState): Movie | null => state.selectedItem,
+  movieDetail: (state: RootState): Movie | null => state.movieDetail,
+  favorites: (state: RootState): MovieDetail[] => state.favorites,
 };
 
 /** Mutations */
@@ -48,10 +70,10 @@ const mutations: MutationTree<RootState> = {
    * @param s - Vuex state
    * @param display - Payload
    */
-  storeLoading(s, display: boolean) {
-    s.loading = display;
+  storeLoading(state: RootState, display: boolean) {
+    state ? state.loading = display : null; 
     if (!display) {
-      s.progress = 0;
+      state.progress = 0;
     }
   },
   /**
@@ -60,9 +82,9 @@ const mutations: MutationTree<RootState> = {
    * @param s - Vuex state
    * @param progress - Payload
    */
-  storeProgress(s, progress: number | null) {
-    s.progress = progress;
-    s.loading = true;
+  storeProgress(state: RootState, progress: number | null) {
+    state.progress = progress;
+    state.loading = true;
   },
   /**
    * Store snackbar text
@@ -70,8 +92,8 @@ const mutations: MutationTree<RootState> = {
    * @param s - Vuex state
    * @param message - Payload
    */
-  storeMessage(s, message: string) {
-    s.message = message;
+  storeMessage(state: RootState, message: string) {
+    state.message = message;
   },
   /**
    * Store error message
@@ -79,8 +101,53 @@ const mutations: MutationTree<RootState> = {
    * @param s - Vuex state
    * @param error - Payload
    */
-  storeError(s, error: string) {
-    s.error = error;
+  storeError(state: RootState, error: string) {
+    state.error = error;
+  },
+  /**
+   * Set search string
+   *
+   * @param s - Vuex state
+   * @param search - Payload
+   */
+  setSearch(state: RootState, search: string) {
+    state.search = search;
+  },
+  /**
+   * Set movies list
+   *
+   * @param state - Vuex state
+   * @param movies - Payload
+   */
+  setMovies(state: RootState, movies: Movie[]) {
+    state.movies = movies;
+  },
+  /**
+   * Set selected item mutation.
+   *
+   * @param state - Vuex State
+   * @param item - Selected item
+   */
+  setSelectedItem(state: RootState, item: Movie | null) {
+    state.selectedItem = item;
+  },
+  /**
+   * Set movie detail mutation.
+   *
+   * @param state - Vuex State
+   * @param item - Selected item
+   */
+  storeMovieDetail(state: RootState, item: MovieDetail | null) {
+    state.movieDetail = item;
+  },
+  /**
+   * Store favorites
+   *
+   * @param state - Vuex state
+   * @param favorites - Payload
+  */
+  storeFavorites(state: RootState, favorites: MovieDetail[]) {
+    state.favorites = favorites;
   },
 };
 
@@ -128,14 +195,140 @@ const actions: ActionTree<RootState, RootState> = {
    * @param context - Vuex Context
    * @param error - Error message etc.
    */
-  setError(context: ActionContext<RootState, RootState>, error) {
+  setError(context: ActionContext<RootState, RootState>, error: string) {
     context.commit('storeError', error);
+  },
+  /**
+   * Set search string
+   *
+   * @param context - Vuex Context
+   * @param search - Search text
+   */
+  setSearch(
+    context: ActionContext<RootState, RootState>,
+    search: string = ''
+  ) {
+    context.commit('setSearch', search);
+    if (search?.length > 2) {
+      context.dispatch('fetchMovies', search);
+    } else {
+      context.commit('setMovies', []);
+    }
+  },
+
+  /**
+   * Fetch list of movie data
+   *
+   * @param context - Vuex Context
+   * @param query - Search text
+   */
+  async fetchMovies(context: ActionContext<RootState, RootState>, query: string) {
+    try {
+      const response = await fetch(`https://www.omdbapi.com/?apikey=3de3c450&s=${query}`);
+      const data = await response.json();
+      // Handle the response data here
+      if (data?.Response === "True" && data?.Search?.length) {
+        context.commit('setMovies', data.Search);
+        context.commit('storeMessage', "Movies found.");
+
+      } 
+      setTimeout(() => {
+        context.commit('storeLoading', false);
+      }, 500);
+    } catch (error) {
+      // Handle any errors that occurred during the request
+      console.error(error);
+    }
+  },
+  /**
+   * Fetch movie detail data
+   *
+   * @param context - Vuex Context
+   * @param query - Search text
+   */
+  async fetchMovieDetail(context: ActionContext<RootState, RootState>, query: string) {
+    try {
+      if (query?.length) {
+        const response = await fetch(`https://www.omdbapi.com/?apikey=3de3c450&i=${query}`);
+        const data = await response.json();
+        // Handle the response data here
+        setTimeout(() => {
+          if (data?.Response !== "False") {
+            context.commit('storeMovieDetail', data);
+            // context.commit('storeError', null);
+            context.commit('storeMessage', "Look your movie details.");
+          } else {
+            context.commit('storeMovieDetail', null);
+          }
+          context.commit('storeLoading', false);
+        }, 1000);
+      }
+    } catch (error) {
+      // Handle any errors that occurred during the request
+      console.error(error);
+    }
+  },
+  /**
+   * Set movies list
+   *
+   * @param context - Vuex Context
+   * @param movies - Movies list
+   */
+  setMovies(
+    context: ActionContext<RootState, RootState>,
+    movies: Movie[] = []
+  ) {
+    context.commit('setMovies', movies);
+  },
+  /**
+   * Set selected item.
+   *
+   * @param context - Vuex Context
+   * @param item - Selected item
+   */
+  setSelectedItem(
+    context: ActionContext<RootState, RootState>,
+    item: Movie | null
+  ) {
+    context.commit('setSelectedItem', item?.imdbID ? item : null);
+  },
+  /**
+   * Set movie detail.
+   *
+   * @param context - Vuex Context
+   * @param item - Selected item
+   */
+  setMovieDetail(
+    context: ActionContext<RootState, RootState>,
+    item: MovieDetail | null) {
+    context.commit('storeMovieDetail', item ? item : null);
+  },
+  /**
+   * Toggle favorite status of a movie
+   *
+   * @param context - Vuex Context
+   * @param movie - movie to toggle favorite status
+   */
+  toggleFavorite(
+    context: ActionContext<RootState, RootState>,
+    movie: WritableComputedRef<MovieDetail>
+  ) {
+    const { commit, state } = context;
+    const isFound = state.favorites.find((m: MovieDetail) => m.imdbID === movie.value.imdbID);
+    if (isFound) {
+      const updatedFavorites = state.favorites.filter((m: MovieDetail) => m.imdbID !== movie.value.imdbID);
+      commit('storeFavorites', updatedFavorites);
+    } else {
+      const clonedMovie = JSON.parse(JSON.stringify(movie.value));
+      const updatedFavorites = [...state.favorites, clonedMovie];
+      commit('storeFavorites', updatedFavorites);
+    }
   },
 };
 
 /** VuexStore */
 const store: StoreOptions<RootState> = {
-  // https://vuex.vuejs.org/guide/strict.html#development-vs-production
+  // https://vuex.vuejstate.org/guide/strict.html#development-vs-production
   strict: import.meta.env.DEV,
   state,
   getters,

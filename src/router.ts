@@ -14,25 +14,19 @@ import {
 import goTo from 'vuetify/lib/services/goto';
 import type { VuetifyGoToTarget } from 'vuetify/types/services/goto';
 
-import ErrorView from '@/views/ErrorView.vue';
-import HomeView from '@/views/HomeView.vue';
+import MoviesView from '@/views/MoviesView.vue';
 
 /** Router Config */
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'Home',
-    component: HomeView,
+    component: MoviesView,
   },
   {
-    path: '/about',
-    name: 'About',
-    component: async () => await import('@/views/AboutView.vue'),
-  },
-  {
-    path: '*',
-    name: 'Error',
-    component: ErrorView,
+    path: '/favorites',
+    name: 'Favorites',
+    component: async () => await import('@/views/FavoritesView.vue'),
   },
 ];
 

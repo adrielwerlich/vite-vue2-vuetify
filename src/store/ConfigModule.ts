@@ -58,6 +58,7 @@ const actions: ActionTree<ConfigState, RootState> = {
   setLocale(context: ActionContext<ConfigState, RootState>, locale: string) {
     context.commit('storeLocale', locale);
   },
+
 };
 
 /** VuexStore */

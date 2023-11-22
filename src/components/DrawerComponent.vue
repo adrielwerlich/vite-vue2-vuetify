@@ -72,14 +72,9 @@ export default defineComponent({
         title: '-', // Divider
       },
       {
-        title: 'About',
+        title: 'Favorites',
         icon: 'mdi-information',
-        to: { name: 'About' },
-      },
-      {
-        title: 'Disabled Item',
-        icon: 'mdi-cancel',
-        // empty `to` value becomes to disabled item
+        to: { name: 'Favorites' },
       },
     ];
 
