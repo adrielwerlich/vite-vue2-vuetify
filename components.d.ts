@@ -8,7 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppBarMenuComponent: typeof import('./src/components/AppBarMenuComponent.vue')['default']
-    copy: typeof import('./src/components/MovieCard copy.vue')['default']
+    copy: typeof import('./src/components/FavoriteMovieCard.vue')['default']
     DrawerComponent: typeof import('./src/components/DrawerComponent.vue')['default']
     FavoriteMovieCard: typeof import('./src/components/FavoriteMovieCard.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
@@ -31,7 +31,6 @@ declare module 'vue' {
     VCardTitle: typeof import('vuetify/lib')['VCardTitle']
     VCol: typeof import('vuetify/lib')['VCol']
     VContainer: typeof import('vuetify/lib')['VContainer']
-    VCounter: typeof import('vuetify/lib')['VCounter']
     VDivider: typeof import('vuetify/lib')['VDivider']
     VExpandTransition: typeof import('vuetify/lib')['VExpandTransition']
     VFadeTransition: typeof import('vuetify/lib')['VFadeTransition']
@@ -47,6 +46,7 @@ declare module 'vue' {
     VOverlay: typeof import('vuetify/lib')['VOverlay']
     VProgressCircular: typeof import('vuetify/lib')['VProgressCircular']
     VProgressLinear: typeof import('vuetify/lib')['VProgressLinear']
+    VResponsive: typeof import('vuetify/lib')['VResponsive']
     VRow: typeof import('vuetify/lib')['VRow']
     VSnackbar: typeof import('vuetify/lib')['VSnackbar']
     VSpacer: typeof import('vuetify/lib')['VSpacer']
