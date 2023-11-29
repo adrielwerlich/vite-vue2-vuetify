@@ -39,7 +39,6 @@
 
     <teleport to="head">
       <meta name="theme-color" :content="theme.currentTheme.primary?.toString()" />
-      <link rel="icon" :href="logo" type="image/svg+xml" />
     </teleport>
   </v-app>
 </template>
@@ -190,7 +189,6 @@ export default defineComponent({
       moviesData,
       selectedItem,
       search,
-      logo,
       theme,
       title,
       drawer,
